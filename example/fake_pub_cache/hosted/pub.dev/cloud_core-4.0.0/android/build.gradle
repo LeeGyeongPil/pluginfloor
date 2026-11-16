@@ -1,0 +1,9 @@
+apply from: "local-config.gradle"
+
+android {
+    compileSdk 34
+
+    defaultConfig {
+        minSdk project.ext.minSdk
+    }
+}

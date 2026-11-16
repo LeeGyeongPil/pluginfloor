@@ -1,0 +1,236 @@
+{
+  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "pluginfloor",
+          "version": "0.1.0",
+          "informationUri": "https://github.com/LeeGyeongPil/pluginfloor",
+          "rules": [
+            {
+              "id": "PF001",
+              "name": "PF001",
+              "shortDescription": {
+                "text": "Android minSdk below a plugin requirement"
+              }
+            },
+            {
+              "id": "PF002",
+              "name": "PF002",
+              "shortDescription": {
+                "text": "Android compileSdk below a plugin requirement"
+              }
+            },
+            {
+              "id": "PF003",
+              "name": "PF003",
+              "shortDescription": {
+                "text": "iOS deployment target below a plugin requirement"
+              }
+            },
+            {
+              "id": "PF004",
+              "name": "PF004",
+              "shortDescription": {
+                "text": "macOS deployment target below a plugin requirement"
+              }
+            },
+            {
+              "id": "PF010",
+              "name": "PF010",
+              "shortDescription": {
+                "text": "Value cannot be resolved statically"
+              }
+            },
+            {
+              "id": "PF011",
+              "name": "PF011",
+              "shortDescription": {
+                "text": "CocoaPods and SwiftPM floors differ"
+              }
+            },
+            {
+              "id": "PF012",
+              "name": "PF012",
+              "shortDescription": {
+                "text": "App value not found"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "PF001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "App android minSdk is 21 but perm_guard_android requires 24."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "android/app/build.gradle.kts"
+                },
+                "region": {
+                  "startLine": 11
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "perm_guard_android/android/build.gradle.kts"
+                },
+                "region": {
+                  "startLine": 11
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PF001",
+          "ruleIndex": 0,
+          "level": "error",
+          "message": {
+            "text": "App android minSdk is 21 but cloud_core requires 23."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "android/app/build.gradle.kts"
+                },
+                "region": {
+                  "startLine": 11
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cloud_core/android/local-config.gradle"
+                },
+                "region": {
+                  "startLine": 3
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PF003",
+          "ruleIndex": 2,
+          "level": "error",
+          "message": {
+            "text": "App iOS deployment target is 13.0 but face_scan_commons requires 15.5."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "ios/Runner.xcodeproj/project.pbxproj"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "face_scan_commons/ios/face_scan_commons.podspec"
+                },
+                "region": {
+                  "startLine": 5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PF004",
+          "ruleIndex": 3,
+          "level": "error",
+          "message": {
+            "text": "App macOS deployment target is 10.14 but cloud_core requires 11.0."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "macos/Podfile"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "relatedLocations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cloud_core/macos/cloud_core/Package.swift"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PF010",
+          "ruleIndex": 4,
+          "level": "warning",
+          "message": {
+            "text": "App android compileSdk is unknown (flutter.compileSdkVersion - set by the Flutter Gradle plugin at build time); plugin floors cannot be compared."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "android/app/build.gradle.kts"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "PF011",
+          "ruleIndex": 5,
+          "level": "note",
+          "message": {
+            "text": "cloud_core: macOS deployment target differs by build path - CocoaPods 10.15, SwiftPM 11.0."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "cloud_core/macos/cloud_core/Package.swift"
+                },
+                "region": {
+                  "startLine": 7
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,14 @@
+name: low_plugin
+version: 1.0.0
+environment:
+  sdk: ^3.0.0
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.example.low
+        pluginClass: LowPlugin
+      ios:
+        pluginClass: LowPlugin
+      macos:
+        pluginClass: LowPlugin

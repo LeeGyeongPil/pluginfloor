@@ -1,0 +1,4 @@
+// Values shared by the plugin's Gradle files.
+ext {
+    minSdk = 23
+}

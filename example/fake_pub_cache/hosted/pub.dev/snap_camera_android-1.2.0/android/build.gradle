@@ -1,0 +1,11 @@
+group 'dev.example.snapcamera'
+version '1.0'
+
+android {
+    namespace 'dev.example.snapcamera'
+    compileSdkVersion flutter.compileSdkVersion
+
+    defaultConfig {
+        minSdkVersion 21
+    }
+}

@@ -1,0 +1,11 @@
+name: snap_camera_android
+version: 1.2.0
+environment:
+  sdk: ^3.0.0
+flutter:
+  plugin:
+    implements: snap_camera
+    platforms:
+      android:
+        package: dev.example.snapcamera
+        pluginClass: SnapCameraPlugin

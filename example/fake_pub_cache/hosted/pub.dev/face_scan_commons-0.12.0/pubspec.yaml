@@ -1,0 +1,9 @@
+name: face_scan_commons
+version: 0.12.0
+environment:
+  sdk: ^3.0.0
+flutter:
+  plugin:
+    platforms:
+      ios:
+        pluginClass: FaceScanCommonsPlugin

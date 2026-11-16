@@ -1,0 +1,398 @@
+{
+  "schemaVersion": 1,
+  "tool": {
+    "name": "pluginfloor",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    "cloud_core",
+    "face_scan_commons",
+    "file_drop",
+    "perm_guard_android",
+    "snap_camera",
+    "snap_camera_android",
+    "snap_camera_darwin"
+  ],
+  "targets": [
+    {
+      "target": "android.minSdk",
+      "app": {
+        "package": null,
+        "target": "android.minSdk",
+        "source": "gradle",
+        "expr": "21",
+        "value": "21",
+        "resolved": true,
+        "file": "android/app/build.gradle.kts",
+        "line": 11
+      },
+      "highest": {
+        "package": "perm_guard_android",
+        "target": "android.minSdk",
+        "source": "gradle",
+        "expr": "24",
+        "value": "24",
+        "resolved": true,
+        "file": "perm_guard_android/android/build.gradle.kts",
+        "line": 11
+      }
+    },
+    {
+      "target": "android.compileSdk",
+      "app": {
+        "package": null,
+        "target": "android.compileSdk",
+        "source": "gradle",
+        "expr": "flutter.compileSdkVersion",
+        "value": null,
+        "resolved": false,
+        "reason": "flutter",
+        "file": "android/app/build.gradle.kts",
+        "line": 7
+      },
+      "highest": {
+        "package": "perm_guard_android",
+        "target": "android.compileSdk",
+        "source": "gradle",
+        "expr": "36",
+        "value": "36",
+        "resolved": true,
+        "file": "perm_guard_android/android/build.gradle.kts",
+        "line": 8
+      }
+    },
+    {
+      "target": "ios.deploymentTarget",
+      "app": {
+        "package": null,
+        "target": "ios.deploymentTarget",
+        "source": "app",
+        "expr": "13.0",
+        "value": "13.0",
+        "resolved": true,
+        "file": "ios/Runner.xcodeproj/project.pbxproj",
+        "line": 7
+      },
+      "highest": {
+        "package": "face_scan_commons",
+        "target": "ios.deploymentTarget",
+        "source": "podspec",
+        "expr": "15.5",
+        "value": "15.5",
+        "resolved": true,
+        "file": "face_scan_commons/ios/face_scan_commons.podspec",
+        "line": 5
+      }
+    },
+    {
+      "target": "macos.deploymentTarget",
+      "app": {
+        "package": null,
+        "target": "macos.deploymentTarget",
+        "source": "app",
+        "expr": "10.14",
+        "value": "10.14",
+        "resolved": true,
+        "file": "macos/Podfile",
+        "line": 1
+      },
+      "highest": {
+        "package": "cloud_core",
+        "target": "macos.deploymentTarget",
+        "source": "spm",
+        "expr": "11.0",
+        "value": "11.0",
+        "resolved": true,
+        "file": "cloud_core/macos/cloud_core/Package.swift",
+        "line": 7
+      }
+    }
+  ],
+  "violations": [
+    {
+      "ruleId": "PF001",
+      "severity": "error",
+      "target": "android.minSdk",
+      "package": "perm_guard_android",
+      "required": "24",
+      "app": "21",
+      "message": "App android minSdk is 21 but perm_guard_android requires 24.",
+      "fix": "set android minSdk to 24 in android/app/build.gradle.kts:11",
+      "location": {
+        "file": "perm_guard_android/android/build.gradle.kts",
+        "line": 11
+      },
+      "appLocation": {
+        "file": "android/app/build.gradle.kts",
+        "line": 11
+      }
+    },
+    {
+      "ruleId": "PF001",
+      "severity": "error",
+      "target": "android.minSdk",
+      "package": "cloud_core",
+      "required": "23",
+      "app": "21",
+      "message": "App android minSdk is 21 but cloud_core requires 23.",
+      "fix": "set android minSdk to 23 in android/app/build.gradle.kts:11",
+      "location": {
+        "file": "cloud_core/android/local-config.gradle",
+        "line": 3
+      },
+      "appLocation": {
+        "file": "android/app/build.gradle.kts",
+        "line": 11
+      }
+    },
+    {
+      "ruleId": "PF003",
+      "severity": "error",
+      "target": "ios.deploymentTarget",
+      "package": "face_scan_commons",
+      "required": "15.5",
+      "app": "13.0",
+      "message": "App iOS deployment target is 13.0 but face_scan_commons requires 15.5.",
+      "fix": "set iOS deployment target to 15.5 in ios/Runner.xcodeproj/project.pbxproj:7",
+      "location": {
+        "file": "face_scan_commons/ios/face_scan_commons.podspec",
+        "line": 5
+      },
+      "appLocation": {
+        "file": "ios/Runner.xcodeproj/project.pbxproj",
+        "line": 7
+      }
+    },
+    {
+      "ruleId": "PF004",
+      "severity": "error",
+      "target": "macos.deploymentTarget",
+      "package": "cloud_core",
+      "required": "11.0",
+      "app": "10.14",
+      "message": "App macOS deployment target is 10.14 but cloud_core requires 11.0.",
+      "fix": "set macOS deployment target to 11.0 in macos/Podfile:1 and raise the Runner target in macos/Runner.xcodeproj/project.pbxproj",
+      "location": {
+        "file": "cloud_core/macos/cloud_core/Package.swift",
+        "line": 7
+      },
+      "appLocation": {
+        "file": "macos/Podfile",
+        "line": 1
+      }
+    },
+    {
+      "ruleId": "PF010",
+      "severity": "warning",
+      "target": "android.compileSdk",
+      "package": null,
+      "required": null,
+      "app": null,
+      "message": "App android compileSdk is unknown (flutter.compileSdkVersion - set by the Flutter Gradle plugin at build time); plugin floors cannot be compared.",
+      "fix": "pass --assume flutter.compileSdkVersion=<number>, or set it in android/local.properties / the app file",
+      "location": {},
+      "appLocation": {
+        "file": "android/app/build.gradle.kts",
+        "line": 7
+      }
+    },
+    {
+      "ruleId": "PF011",
+      "severity": "note",
+      "target": "macos.deploymentTarget",
+      "package": "cloud_core",
+      "required": null,
+      "app": null,
+      "message": "cloud_core: macOS deployment target differs by build path - CocoaPods 10.15, SwiftPM 11.0.",
+      "fix": "choose the build path with --darwin-path cocoapods or --darwin-path spm",
+      "location": {
+        "file": "cloud_core/macos/cloud_core/Package.swift",
+        "line": 7
+      },
+      "appLocation": {}
+    }
+  ],
+  "findings": [
+    {
+      "package": "cloud_core",
+      "target": "android.minSdk",
+      "source": "gradle",
+      "expr": "project.ext.minSdk",
+      "value": "23",
+      "resolved": true,
+      "file": "cloud_core/android/local-config.gradle",
+      "line": 3,
+      "via": {
+        "file": "cloud_core/android/build.gradle",
+        "line": 7
+      }
+    },
+    {
+      "package": "cloud_core",
+      "target": "android.compileSdk",
+      "source": "gradle",
+      "expr": "34",
+      "value": "34",
+      "resolved": true,
+      "file": "cloud_core/android/build.gradle",
+      "line": 4
+    },
+    {
+      "package": "cloud_core",
+      "target": "macos.deploymentTarget",
+      "source": "podspec",
+      "expr": "10.15",
+      "value": "10.15",
+      "resolved": true,
+      "file": "cloud_core/macos/cloud_core.podspec",
+      "line": 5
+    },
+    {
+      "package": "cloud_core",
+      "target": "macos.deploymentTarget",
+      "source": "spm",
+      "expr": "11.0",
+      "value": "11.0",
+      "resolved": true,
+      "file": "cloud_core/macos/cloud_core/Package.swift",
+      "line": 7
+    },
+    {
+      "package": "face_scan_commons",
+      "target": "ios.deploymentTarget",
+      "source": "podspec",
+      "expr": "15.5",
+      "value": "15.5",
+      "resolved": true,
+      "file": "face_scan_commons/ios/face_scan_commons.podspec",
+      "line": 5
+    },
+    {
+      "package": "file_drop",
+      "target": "android.minSdk",
+      "source": "manifest",
+      "expr": "19",
+      "value": "19",
+      "resolved": true,
+      "file": "file_drop/android/src/main/AndroidManifest.xml",
+      "line": 4
+    },
+    {
+      "package": "file_drop",
+      "target": "ios.deploymentTarget",
+      "source": "spm",
+      "expr": "13",
+      "value": "13",
+      "resolved": true,
+      "file": "file_drop/ios/file_drop/Package.swift",
+      "line": 7
+    },
+    {
+      "package": "perm_guard_android",
+      "target": "android.minSdk",
+      "source": "gradle",
+      "expr": "24",
+      "value": "24",
+      "resolved": true,
+      "file": "perm_guard_android/android/build.gradle.kts",
+      "line": 11
+    },
+    {
+      "package": "perm_guard_android",
+      "target": "android.compileSdk",
+      "source": "gradle",
+      "expr": "36",
+      "value": "36",
+      "resolved": true,
+      "file": "perm_guard_android/android/build.gradle.kts",
+      "line": 8
+    },
+    {
+      "package": "snap_camera_android",
+      "target": "android.minSdk",
+      "source": "gradle",
+      "expr": "21",
+      "value": "21",
+      "resolved": true,
+      "file": "snap_camera_android/android/build.gradle",
+      "line": 9
+    },
+    {
+      "package": "snap_camera_android",
+      "target": "android.compileSdk",
+      "source": "gradle",
+      "expr": "flutter.compileSdkVersion",
+      "value": null,
+      "resolved": false,
+      "reason": "flutter",
+      "file": "snap_camera_android/android/build.gradle",
+      "line": 6
+    },
+    {
+      "package": "snap_camera_darwin",
+      "target": "ios.deploymentTarget",
+      "source": "podspec",
+      "expr": "12.0",
+      "value": "12.0",
+      "resolved": true,
+      "file": "snap_camera_darwin/darwin/snap_camera_darwin.podspec",
+      "line": 6
+    },
+    {
+      "package": "snap_camera_darwin",
+      "target": "ios.deploymentTarget",
+      "source": "spm",
+      "expr": "12.0",
+      "value": "12.0",
+      "resolved": true,
+      "file": "snap_camera_darwin/darwin/snap_camera_darwin/Package.swift",
+      "line": 7
+    },
+    {
+      "package": "snap_camera_darwin",
+      "target": "macos.deploymentTarget",
+      "source": "podspec",
+      "expr": "10.14",
+      "value": "10.14",
+      "resolved": true,
+      "file": "snap_camera_darwin/darwin/snap_camera_darwin.podspec",
+      "line": 7
+    },
+    {
+      "package": "snap_camera_darwin",
+      "target": "macos.deploymentTarget",
+      "source": "spm",
+      "expr": "10.14",
+      "value": "10.14",
+      "resolved": true,
+      "file": "snap_camera_darwin/darwin/snap_camera_darwin/Package.swift",
+      "line": 8
+    }
+  ],
+  "unresolved": [
+    {
+      "package": "snap_camera_android",
+      "target": "android.compileSdk",
+      "source": "gradle",
+      "expr": "flutter.compileSdkVersion",
+      "value": null,
+      "resolved": false,
+      "reason": "flutter",
+      "file": "snap_camera_android/android/build.gradle",
+      "line": 6,
+      "benign": true
+    },
+    {
+      "package": null,
+      "target": "android.compileSdk",
+      "source": "gradle",
+      "expr": "flutter.compileSdkVersion",
+      "value": null,
+      "resolved": false,
+      "reason": "flutter",
+      "file": "android/app/build.gradle.kts",
+      "line": 7,
+      "benign": false
+    }
+  ]
+}

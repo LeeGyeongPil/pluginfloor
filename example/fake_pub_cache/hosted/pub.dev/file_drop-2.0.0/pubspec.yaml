@@ -1,0 +1,12 @@
+name: file_drop
+version: 2.0.0
+environment:
+  sdk: ^3.0.0
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.example.filedrop
+        pluginClass: FileDropPlugin
+      ios:
+        pluginClass: FileDropPlugin

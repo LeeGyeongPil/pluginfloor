@@ -1,0 +1,12 @@
+name: cloud_core
+version: 4.0.0
+environment:
+  sdk: ^3.0.0
+flutter:
+  plugin:
+    platforms:
+      android:
+        package: dev.example.cloudcore
+        pluginClass: CloudCorePlugin
+      macos:
+        pluginClass: CloudCorePlugin

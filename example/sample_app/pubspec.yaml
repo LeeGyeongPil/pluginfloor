@@ -1,0 +1,5 @@
+name: sample_app
+description: Hand-made fake Flutter app used by the pluginfloor examples.
+publish_to: none
+environment:
+  sdk: ^3.0.0

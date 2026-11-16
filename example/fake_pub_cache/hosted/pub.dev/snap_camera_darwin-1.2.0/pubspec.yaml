@@ -1,0 +1,14 @@
+name: snap_camera_darwin
+version: 1.2.0
+environment:
+  sdk: ^3.0.0
+flutter:
+  plugin:
+    implements: snap_camera
+    platforms:
+      ios:
+        pluginClass: SnapCameraPlugin
+        sharedDarwinSource: true
+      macos:
+        pluginClass: SnapCameraPlugin
+        sharedDarwinSource: true
