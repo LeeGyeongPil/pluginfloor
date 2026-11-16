@@ -25,7 +25,7 @@ dart run bin/pluginfloor.dart --version
 ```
 
 ```text
-pluginfloor 0.1.1
+pluginfloor 0.1.2
 ```
 
 검사할 앱에서 `flutter pub get` 을 한 번 실행해 두어야 합니다. 앱의 `.dart_tool/package_config.json` 을 읽기 때문입니다.
@@ -41,7 +41,7 @@ dart run bin/pluginfloor.dart check example/sample_app --lang ko
 `--lang ko` 를 빼면 로캘에 따라 언어가 정해집니다.
 
 ```text
-pluginfloor 0.1.1 - example/sample_app 에서 플러그인 7개 검사
+pluginfloor 0.1.2 - example/sample_app 에서 플러그인 7개 검사
 
 대상별 가장 높은 하한
   대상                   앱          필요  원인
@@ -82,7 +82,7 @@ pluginfloor 0.1.1 - example/sample_app 에서 플러그인 7개 검사
 모든 하한을 만족하면 `위반이 없습니다.` 가 나오고 종료 코드는 `0` 입니다.
 
 ```text
-pluginfloor 0.1.1 - test/fixtures/ok_app 에서 플러그인 1개 검사
+pluginfloor 0.1.2 - test/fixtures/ok_app 에서 플러그인 1개 검사
 
 대상별 가장 높은 하한
   대상                   앱    필요   원인

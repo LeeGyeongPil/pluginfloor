@@ -25,7 +25,7 @@ dart run bin/pluginfloor.dart --version
 ```
 
 ```text
-pluginfloor 0.1.1
+pluginfloor 0.1.2
 ```
 
 Your app must have had `flutter pub get` run once, because pluginfloor reads `.dart_tool/package_config.json` from it.
@@ -41,7 +41,7 @@ dart run bin/pluginfloor.dart check example/sample_app --lang en
 Use `--lang en` to force English; without it the language follows your locale.
 
 ```text
-pluginfloor 0.1.1 - 7 plugins scanned in example/sample_app
+pluginfloor 0.1.2 - 7 plugins scanned in example/sample_app
 
 Highest floor per target
   Target                   App      Required  Raised by
@@ -82,7 +82,7 @@ How to read it:
 An app that satisfies every floor prints `No violations.` and exits `0`:
 
 ```text
-pluginfloor 0.1.1 - 1 plugin scanned in test/fixtures/ok_app
+pluginfloor 0.1.2 - 1 plugin scanned in test/fixtures/ok_app
 
 Highest floor per target
   Target                   App   Required  Raised by

@@ -2,7 +2,7 @@ name: pluginfloor
 description: >-
   Statically collects the Android minSdk/compileSdk and iOS/macOS deployment
   target floors of every Flutter plugin in an app and fails CI before the build does.
-version: 0.1.1
+version: 0.1.2
 repository: https://github.com/LeeGyeongPil/pluginfloor
 issue_tracker: https://github.com/LeeGyeongPil/pluginfloor/issues
 topics:
