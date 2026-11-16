@@ -1,0 +1,38 @@
+# Offline fixtures only: no network, keys or Flutter SDK are needed to run the tests.
+name: ci
+on:
+  push:
+  pull_request:
+  schedule:
+    - cron: "17 3 * * 1"   # weekly: catch breakage from new Dart SDK or dependency releases
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # 3.8.1 = minimum supported SDK (pubspec: ^3.8.0); stable = newest
+        sdk: ["3.8.1", "stable"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ matrix.sdk }}
+      - run: dart pub get
+      - name: Analyze (strict on the minimum SDK, errors and warnings only on newer ones)
+        run: |
+          if [ "${{ matrix.sdk }}" = "3.8.1" ]; then
+            dart analyze --fatal-infos
+          else
+            dart analyze
+          fi
+      - name: Format check (formatter output is pinned to the minimum SDK)
+        if: matrix.sdk == '3.8.1'
+        run: dart format --output=none --set-exit-if-changed .
+      - run: dart test
+      - name: Sample app must report violations (exit code 1)
+        run: |
+          set +e
+          dart run bin/pluginfloor.dart check example/sample_app --lang en
+          test $? -eq 1
