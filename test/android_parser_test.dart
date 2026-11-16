@@ -367,7 +367,8 @@ android {
     });
 
     test('release(<ext name>) resolves through definitions', () {
-      const text = 'def lo = 21\nandroid { minSdk { version = release(lo) } }\n';
+      const text =
+          'def lo = 21\nandroid { minSdk { version = release(lo) } }\n';
       final fs = parseGradle(text, file: 'b.gradle');
       expect(fs.single.value, '21');
       expect(fs.single.expr, 'lo');
