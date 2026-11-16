@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:pluginfloor/pluginfloor.dart';
+import 'package:pluginfloor/src/i18n/messages.dart';
 import 'package:test/test.dart';
 
 import 'helpers.dart';
@@ -218,6 +219,81 @@ void main() {
         'minSdk = 24',
       );
       expect(ids(scan(app), 'PF001'), isEmpty);
+    });
+  });
+
+  group('AGP block syntax', () {
+    late Directory tmp;
+    late String app;
+    setUp(() {
+      tmp = copyExample();
+      app = '${tmp.path}/example/sample_app';
+    });
+    tearDown(() => tmp.deleteSync(recursive: true));
+
+    test('plugin block values raise PF001 + PF002 and no PF010', () {
+      writeFiles(
+        '${tmp.path}/example/fake_pub_cache/hosted/pub.dev/'
+        'perm_guard_android-3.0.0',
+        {
+          'android/build.gradle.kts': '''
+android {
+    compileSdk {
+        version = release(36)
+    }
+    defaultConfig {
+        minSdk { version = release(26) }
+    }
+}
+''',
+        },
+      );
+      replaceIn(
+        '$app/android/app/build.gradle.kts',
+        'compileSdk = flutter.compileSdkVersion',
+        'compileSdk = 35',
+      );
+      final r = scan(app);
+      expect(ids(r, 'PF001'), contains('perm_guard_android:21<26'));
+      expect(ids(r, 'PF002'), contains('perm_guard_android:35<36'));
+      expect(
+        r.violations.where(
+          (v) => v.ruleId == 'PF010' && v.package == 'perm_guard_android',
+        ),
+        isEmpty,
+      );
+    });
+
+    test('app side reads the block syntax too', () {
+      replaceIn(
+        '$app/android/app/build.gradle.kts',
+        'minSdk = 21',
+        'minSdk { version = release(21) }',
+      );
+      final min = summary(scan(app), Target.androidMinSdk).app!;
+      expect((min.value, min.line), ('21', 11));
+    });
+
+    test('unreadable expression gets a fix hint without an --assume KEY', () {
+      replaceIn(
+        '$app/android/app/build.gradle.kts',
+        'minSdk = 21',
+        'minSdk { version = release(flutter.x + 1) }',
+      );
+      final r = scan(app);
+      final v = r.violations.firstWhere(
+        (v) =>
+            v.ruleId == 'PF010' &&
+            v.messageKey == 'msg.PF010.app' &&
+            v.target == Target.androidMinSdk,
+      );
+      for (final lang in ['en', 'ko']) {
+        final fix = Messages.forLang(lang).fix(v)!;
+        expect(fix, isNot(contains('--assume {')), reason: lang);
+        expect(fix, isNot(contains('release(')), reason: lang);
+      }
+      expect(Messages.en.fix(v), isNot(contains('KEY=')));
+      expect(v.fixKey, 'fix.unresolvedExpr');
     });
   });
 }

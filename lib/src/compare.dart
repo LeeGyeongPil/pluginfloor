@@ -61,6 +61,12 @@ String _pbxproj(Target t) => switch (t) {
   _ => '',
 };
 
+final RegExp _assumeKey = RegExp(r'^[A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*$');
+
+/// `--assume` needs a plain name; other fragments get a hint without a KEY.
+String _unresolvedFix(String expr) =>
+    _assumeKey.hasMatch(expr) ? 'fix.unresolved' : 'fix.unresolvedExpr';
+
 /// Compares plugin floors with the app and applies the PF rules.
 ///
 /// [assume] values replace unresolved names on both sides; the app's
@@ -125,7 +131,7 @@ ScanReport compare({
           ruleId: 'PF010',
           severity: 'warning',
           messageKey: 'msg.PF010.plugin',
-          fixKey: 'fix.unresolved',
+          fixKey: _unresolvedFix(f.expr),
           target: t,
           package: f.package,
           file: f.file,
@@ -162,7 +168,7 @@ ScanReport compare({
             ruleId: 'PF010',
             severity: 'warning',
             messageKey: 'msg.PF010.app',
-            fixKey: 'fix.unresolved',
+            fixKey: _unresolvedFix(appF.expr),
             target: t,
             appFile: appF.file,
             appLine: appF.line,

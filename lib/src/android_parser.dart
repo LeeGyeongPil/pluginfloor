@@ -12,6 +12,31 @@ final RegExp _declaration = RegExp(
   multiLine: true,
 );
 
+/// `release(36)` / `release(36, 1)` / `release(36) { minorApiLevel = 1 }`.
+final RegExp _releaseCall = RegExp(
+  r'^release[ \t]*\([ \t]*(\d+)[ \t]*(?:,[^)]*)?\)',
+);
+
+/// `version = release(N)` inside an AGP `compileSdk { ... }` block.
+final RegExp _blockVersion = RegExp(r'\bversion[ \t]*=[ \t]*([^\r\n;}]*)');
+
+/// Body text between the `{` at [open] and its matching `}`; when the block
+/// is never closed, everything after the `{`.
+String _blockBody(String s, int open) {
+  var depth = 0;
+  for (var i = open; i < s.length; i++) {
+    final c = s[i];
+    if (c == '{') depth++;
+    if (c == '}' && --depth == 0) return s.substring(open + 1, i);
+  }
+  return s.substring(open + 1);
+}
+
+/// `release(flutter.minSdkVersion)`: a named value inside `release(...)`.
+final RegExp _releaseName = RegExp(
+  r'^release[ \t]*\([ \t]*([A-Za-z_]\w*(?:\.[A-Za-z_]\w*)*)[ \t]*\)',
+);
+
 final RegExp _strictDef = RegExp(
   r'^[ \t]*(?:(?:def|val|var|final|int)[ \t]+|(?:project\.)?ext\.)'
   r'([A-Za-z_]\w*)[ \t]*=[ \t]*(\d+)[ \t]*;?[ \t]*$',
@@ -88,13 +113,73 @@ List<Finding> parseGradle(
   for (final m in _declaration.allMatches(s)) {
     final target = _targetOf(m[1]!);
     var expr = m[3]!.split(RegExp(r'[};]')).first.trim();
+    var line = lineOf(s, m.start);
+    final rest = m[3]!;
+    final braceAt = rest.indexOf('{');
+    if (braceAt >= 0 && rest.substring(0, braceAt).trim().isEmpty) {
+      // AGP block syntax: compileSdk { version = release(N) }
+      final open = m.end - rest.length + braceAt;
+      final body = _blockBody(s, open);
+      final v = _blockVersion.firstMatch(body);
+      final inner = v == null ? null : v[1]!.trim();
+      final rel = inner == null ? null : _releaseCall.firstMatch(inner);
+      if (v != null) line = lineOf(s, open + 1 + v.start);
+      if (rel != null) {
+        out.add(
+          Finding(
+            package: package,
+            target: target,
+            source: source,
+            expr: 'release(${rel[1]})',
+            value: rel[1],
+            file: file,
+            line: line,
+          ),
+        );
+      } else {
+        final named = inner == null ? null : _releaseName.firstMatch(inner);
+        if (named != null) {
+          // release(flutter.minSdkVersion): resolve like a plain named value.
+          expr = named[1]!;
+        } else {
+          out.add(
+            Finding(
+              package: package,
+              target: target,
+              source: source,
+              expr:
+                  inner ?? '{ ${body.trim().replaceAll(RegExp(r'\s+'), ' ')} }',
+              file: file,
+              line: line,
+              reason: 'expression',
+            ),
+          );
+          continue;
+        }
+      }
+      if (rel != null) continue;
+    }
+    final relTail = _releaseCall.firstMatch(expr);
+    if (relTail != null) {
+      out.add(
+        Finding(
+          package: package,
+          target: target,
+          source: source,
+          expr: 'release(${relTail[1]})',
+          value: relTail[1],
+          file: file,
+          line: line,
+        ),
+      );
+      continue;
+    }
     if (m[2] == '(') {
       final close = expr.lastIndexOf(')');
       if (close >= 0) expr = expr.substring(0, close);
     }
     expr = expr.replaceAll(RegExp(r';\s*$'), '').trim();
     if (expr.isEmpty) continue;
-    final line = lineOf(s, m.start);
     Finding unresolved(String reason) => Finding(
       package: package,
       target: target,

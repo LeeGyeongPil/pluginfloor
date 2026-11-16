@@ -163,6 +163,8 @@ const Map<String, String> _en = {
       'set {what} to {required} in {file}:{line} and raise the Runner target in {pbx}',
   'fix.unresolved':
       'pass --assume {expr}=<number>, or set it in android/local.properties / the app file',
+  'fix.unresolvedExpr':
+      'write a plain number in the Gradle file, or pass --assume NAME=<number> for a named value',
   'fix.darwinPath':
       'choose the build path with --darwin-path cocoapods or --darwin-path spm',
   'fix.notFound': 'declare it in {hint}, or pass --assume',
@@ -261,6 +263,8 @@ const Map<String, String> _ko = {
       '{file}:{line} 에서 {what} 을(를) {required} 이상으로 올리고 {pbx} 의 Runner 타깃도 올리세요',
   'fix.unresolved':
       '--assume {expr}=<숫자> 를 주거나 android/local.properties·앱 파일에 값을 적으세요',
+  'fix.unresolvedExpr':
+      'Gradle 파일에 숫자를 직접 적거나, 이름이 있는 값이면 --assume 이름=<숫자> 를 주세요',
   'fix.darwinPath':
       '--darwin-path cocoapods 또는 --darwin-path spm 으로 빌드 경로를 고르세요',
   'fix.notFound': '{hint} 에 값을 선언하거나 --assume 을 주세요',

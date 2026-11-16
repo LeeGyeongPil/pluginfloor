@@ -302,4 +302,96 @@ android {
       ]);
     });
   });
+
+  group('AGP block syntax', () {
+    Map<String, (String?, int)> read(String text) => {
+      for (final f in parseGradle(text, file: 'b.gradle'))
+        f.target.id: (f.value, f.line),
+    };
+
+    test('multi-line and one-line blocks (Groovy and KTS)', () {
+      const text = '''
+android {
+    compileSdk {
+        version = release(36)
+    }
+    defaultConfig {
+        minSdk { version = release(26) }
+    }
+}
+''';
+      final fs = parseGradle(text, file: 'b.gradle');
+      expect(rows(fs), [
+        ('android.compileSdk', '36', true, 'b.gradle', 3),
+        ('android.minSdk', '26', true, 'b.gradle', 6),
+      ]);
+      expect(fs.first.expr, 'release(36)');
+    });
+
+    test('release(N) with a minorApiLevel tail and *Version names', () {
+      const text = '''
+android {
+    compileSdkVersion = release(36) { minorApiLevel = 1 }
+    compileSdk {
+        version = release(35) {
+            minorApiLevel = 1
+        }
+    }
+    minSdk { version = release(24, 2) }
+}
+''';
+      expect(rows(parseGradle(text, file: 'k.kts')), [
+        ('android.compileSdk', '36', true, 'k.kts', 2),
+        ('android.compileSdk', '35', true, 'k.kts', 4),
+        ('android.minSdk', '24', true, 'k.kts', 8),
+      ]);
+    });
+
+    test('unreadable block stays unresolved with the readable fragment', () {
+      const text = '''
+android {
+    minSdk { version = release(flutter.minSdk) }
+    compileSdk {
+        somethingElse()
+    }
+}
+''';
+      final fs = parseGradle(text, file: 'b.gradle');
+      expect(fs.map((f) => (f.value, f.reason)), [
+        (null, 'flutter'),
+        (null, 'expression'),
+      ]);
+      // release(<name>) is unwrapped so --assume NAME=<n> can resolve it.
+      expect(fs.first.expr, 'flutter.minSdk');
+      expect(fs.first.line, 2);
+    });
+
+    test('release(<ext name>) resolves through definitions', () {
+      const text = 'def lo = 21\nandroid { minSdk { version = release(lo) } }\n';
+      final fs = parseGradle(text, file: 'b.gradle');
+      expect(fs.single.value, '21');
+      expect(fs.single.expr, 'lo');
+    });
+
+    test('unclosed block with "{" at end of file does not throw', () {
+      final fs = parseGradle('android {\n    compileSdk {', file: 'b.gradle');
+      expect(fs.map((f) => f.reason), ['expression']);
+    });
+
+    test('unclosed block still reads the last character', () {
+      final fs = parseGradle(
+        'android {\n    compileSdk {\n        version = release(36)',
+        file: 'b.gradle',
+      );
+      expect(fs.single.value, '36');
+      expect(fs.single.line, 3);
+    });
+
+    test('values stay readable next to existing forms', () {
+      expect(read('compileSdk = 35\nminSdk 21\ncompileSdkVersion(34)\n'), {
+        'android.compileSdk': ('34', 3),
+        'android.minSdk': ('21', 2),
+      });
+    });
+  });
 }
