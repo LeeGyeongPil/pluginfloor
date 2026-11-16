@@ -3,6 +3,13 @@
 All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.1.1] - 2026-11-17
+
+### Fixed
+
+- Gradle `compileSdk { version = release(N) }` / `minSdk { version = release(N) }` blocks (one-line, multi-line, `release(N) { minorApiLevel = ... }`) are now read instead of being reported as PF010.
+- The PF010 fix hint no longer offers a code fragment as the `--assume` KEY; unreadable expressions get a hint without a KEY (English and Korean).
+
 ## [0.1.0] - 2026-11-16
 
 ### Added
@@ -19,4 +26,5 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Bundled fake sample app in `example/sample_app`.
 - Korean table columns are padded by display width; Korean help text includes defaults; singular title for one plugin; Apple `Package.swift` violations also point at the Runner `project.pbxproj`.
 
+[0.1.1]: https://github.com/LeeGyeongPil/pluginfloor/releases/tag/v0.1.1
 [0.1.0]: https://github.com/LeeGyeongPil/pluginfloor/releases/tag/v0.1.0

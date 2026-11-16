@@ -25,7 +25,7 @@ dart run bin/pluginfloor.dart --version
 ```
 
 ```text
-pluginfloor 0.1.0
+pluginfloor 0.1.1
 ```
 
 검사할 앱에서 `flutter pub get` 을 한 번 실행해 두어야 합니다. 앱의 `.dart_tool/package_config.json` 을 읽기 때문입니다.
@@ -41,7 +41,7 @@ dart run bin/pluginfloor.dart check example/sample_app --lang ko
 `--lang ko` 를 빼면 로캘에 따라 언어가 정해집니다.
 
 ```text
-pluginfloor 0.1.0 - example/sample_app 에서 플러그인 7개 검사
+pluginfloor 0.1.1 - example/sample_app 에서 플러그인 7개 검사
 
 대상별 가장 높은 하한
   대상                   앱          필요  원인
@@ -82,7 +82,7 @@ pluginfloor 0.1.0 - example/sample_app 에서 플러그인 7개 검사
 모든 하한을 만족하면 `위반이 없습니다.` 가 나오고 종료 코드는 `0` 입니다.
 
 ```text
-pluginfloor 0.1.0 - test/fixtures/ok_app 에서 플러그인 1개 검사
+pluginfloor 0.1.1 - test/fixtures/ok_app 에서 플러그인 1개 검사
 
 대상별 가장 높은 하한
   대상                   앱    필요   원인
@@ -210,7 +210,7 @@ flowchart LR
 ```
 
 1. `package_config.json` 에서 pubspec 에 `flutter: plugin:` 이 있는 패키지를 고릅니다(federated 구현 패키지 포함). 앱 자신과 플러그인의 `example/` 폴더는 제외합니다.
-2. 각 플러그인의 Gradle 파일·매니페스트에서 minSdk/compileSdk 를, podspec·`Package.swift` 에서 배포 대상을 줄 번호와 함께 읽습니다.
+2. 각 플러그인의 Gradle 파일·매니페스트에서 minSdk/compileSdk 를, podspec·`Package.swift` 에서 배포 대상을 줄 번호와 함께 읽습니다(AGP 블록 문법 `compileSdk { version = release(36) }` 포함).
 3. 앱의 파일에서 같은 값을 읽습니다.
 4. 대상마다 플러그인별 가장 높은 값을 남기고, 앱 값보다 높은 것을 보고합니다.
 5. 정적으로 정할 수 없는 값(`flutter.*`, `rootProject.*`, Ruby 식)은 추측하지 않고 알 수 없음으로 보고합니다. 리터럴 `ext` 값을 가진 `apply from:` 한 단계는 풀어 줍니다.

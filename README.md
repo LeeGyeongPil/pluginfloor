@@ -25,7 +25,7 @@ dart run bin/pluginfloor.dart --version
 ```
 
 ```text
-pluginfloor 0.1.0
+pluginfloor 0.1.1
 ```
 
 Your app must have had `flutter pub get` run once, because pluginfloor reads `.dart_tool/package_config.json` from it.
@@ -41,7 +41,7 @@ dart run bin/pluginfloor.dart check example/sample_app --lang en
 Use `--lang en` to force English; without it the language follows your locale.
 
 ```text
-pluginfloor 0.1.0 - 7 plugins scanned in example/sample_app
+pluginfloor 0.1.1 - 7 plugins scanned in example/sample_app
 
 Highest floor per target
   Target                   App      Required  Raised by
@@ -82,7 +82,7 @@ How to read it:
 An app that satisfies every floor prints `No violations.` and exits `0`:
 
 ```text
-pluginfloor 0.1.0 - 1 plugin scanned in test/fixtures/ok_app
+pluginfloor 0.1.1 - 1 plugin scanned in test/fixtures/ok_app
 
 Highest floor per target
   Target                   App   Required  Raised by
@@ -211,7 +211,7 @@ flowchart LR
 ```
 
 1. It lists packages in `package_config.json` that declare `flutter: plugin:` in their pubspec, federated implementation packages included. The app itself and plugin `example/` folders are ignored.
-2. It reads minSdk/compileSdk from each plugin's Gradle files and manifest, and deployment targets from podspecs and `Package.swift`, with line numbers.
+2. It reads minSdk/compileSdk from each plugin's Gradle files and manifest, and deployment targets from podspecs and `Package.swift`, with line numbers (including the AGP block form `compileSdk { version = release(36) }`).
 3. It reads the same values from your app's files.
 4. Per target, it keeps each plugin's highest value and reports the ones above the app value.
 5. Values it cannot determine statically (`flutter.*`, `rootProject.*`, Ruby expressions) are reported as unknown, never guessed. One `apply from:` hop with a literal `ext` value is resolved.
