@@ -25,7 +25,7 @@ dart run bin/pluginfloor.dart --version
 ```
 
 ```text
-pluginfloor 0.1.2
+pluginfloor 0.2.0
 ```
 
 검사할 앱에서 `flutter pub get` 을 한 번 실행해 두어야 합니다. 앱의 `.dart_tool/package_config.json` 을 읽기 때문입니다.
@@ -41,7 +41,7 @@ dart run bin/pluginfloor.dart check example/sample_app --lang ko
 `--lang ko` 를 빼면 로캘에 따라 언어가 정해집니다.
 
 ```text
-pluginfloor 0.1.2 - example/sample_app 에서 플러그인 7개 검사
+pluginfloor 0.2.0 - example/sample_app 에서 플러그인 7개 검사
 
 대상별 가장 높은 하한
   대상                   앱          필요  원인
@@ -82,7 +82,7 @@ pluginfloor 0.1.2 - example/sample_app 에서 플러그인 7개 검사
 모든 하한을 만족하면 `위반이 없습니다.` 가 나오고 종료 코드는 `0` 입니다.
 
 ```text
-pluginfloor 0.1.2 - test/fixtures/ok_app 에서 플러그인 1개 검사
+pluginfloor 0.2.0 - test/fixtures/ok_app 에서 플러그인 1개 검사
 
 대상별 가장 높은 하한
   대상                   앱    필요   원인
@@ -102,13 +102,13 @@ pluginfloor 0.1.2 - test/fixtures/ok_app 에서 플러그인 1개 검사
 
 ### 중요: Flutter 기본 템플릿 앱
 
-새로 `flutter create` 한 앱은 `android/app/build.gradle.kts` 에 `minSdk = flutter.minSdkVersion`, `compileSdk = flutter.compileSdkVersion` 이라고 적습니다. 이 값은 빌드 때 Flutter Gradle 플러그인이 정하므로 pluginfloor 가 읽을 수 없습니다. **도와주지 않으면 Android 비교를 건너뜁니다**(PF010 경고만 나오고, 플러그인이 더 높은 값을 요구해도 PF001/PF002 는 나오지 않음). 빌드에 쓰는 Flutter 버전의 값을 알려 주거나, 앱 Gradle 파일에 숫자를 직접 적으세요.
+새로 `flutter create` 한 앱은 `android/app/build.gradle.kts` 에 `minSdk = flutter.minSdkVersion`, `compileSdk = flutter.compileSdkVersion` 이라고 적습니다. 이 값은 빌드 때 Flutter Gradle 플러그인이 정합니다. 그래서 pluginfloor 는 Flutter SDK 의 기본값을 자동으로 읽습니다(`.dart_tool/package_config.json` 의 `flutter` 항목이 SDK 위치를 알려 주고, `FlutterExtension.kt` 의 숫자 두 개만 읽으며 빌드·실행은 하지 않음). `--assume` 은 덮어쓸 때만 쓰세요(우선순위: `--assume` > `android/local.properties` > SDK 값). SDK 파일을 찾지 못하거나 읽지 못하면 예전처럼 PF010 경고로 남고 Android 비교를 건너뜁니다.
 
 ```bash
 dart run bin/pluginfloor.dart check . --assume flutter.minSdkVersion=21 --assume flutter.compileSdkVersion=35
 ```
 
-숫자는 설치한 Flutter SDK 의 `FlutterExtension.kt`(`packages/flutter_tools/gradle/src/main/kotlin/`)에 적힌 기본값입니다. Flutter 3.32.4 SDK 에서는(2026-11-16 확인) `minSdkVersion = 21`, `compileSdkVersion = 35` 입니다. Flutter 버전마다 달라지니 내 버전에서 확인하세요. SDK 에서 자동으로 읽는 기능은 아직 없습니다.
+숫자의 출처는 설치한 Flutter SDK 의 `FlutterExtension.kt`(`packages/flutter_tools/gradle/src/main/kotlin/`)에 적힌 기본값입니다. Flutter 3.32.4 SDK 에서는(2026-11-16 확인) `minSdkVersion = 21`, `compileSdkVersion = 35` 입니다. Flutter 버전마다 달라집니다. 참고: 이전에 PF010 만 나오던 앱도 이제 PF001/PF002 error 가 새로 나와 CI 가 실패로 바뀔 수 있습니다.
 
 ## 사용법
 
@@ -118,7 +118,7 @@ dart run bin/pluginfloor.dart check [app_dir] [options]
 
 | 옵션 | 하는 일 | 예 |
 |---|---|---|
-| `--assume KEY=VALUE` | 정적으로 풀 수 없는 이름에 값을 지정(반복 가능) | `--assume flutter.compileSdkVersion=35` |
+| `--assume KEY=VALUE` | 이름의 값을 덮어쓰거나 지정(반복 가능). `flutter.*` 는 SDK 파일을 읽지 못할 때만 필요 | `--assume flutter.compileSdkVersion=35` |
 | `--darwin-path cocoapods\|spm\|both` | 하한을 정할 Apple 빌드 경로(기본 `both`, 높은 값) | `--darwin-path cocoapods` |
 | `--format table\|json\|sarif` | 보고서 형식 | `--format sarif` |
 | `--output FILE` | 보고서를 파일로 쓰고 stdout 에는 한 줄 요약만 | `--output floors.sarif` |
@@ -134,7 +134,7 @@ dart run bin/pluginfloor.dart check [app_dir] [options]
 
 ### 모르는 값 채우기
 
-`flutter.compileSdkVersion` 은 빌드 때 Flutter Gradle 플러그인이 정하므로 추측하지 않고 PF010 으로 알립니다. 실제로 빌드에 쓰는 값을 주세요.
+`flutter.compileSdkVersion` 은 빌드 때 Flutter Gradle 플러그인이 정하므로 Flutter SDK 에서 읽고, 읽지 못하면(`package_config.json` 에 `flutter` 항목이 없는 예제 앱처럼) 추측하지 않고 PF010 으로 알립니다. 실제로 빌드에 쓰는 값을 주세요.
 
 ```bash
 dart run bin/pluginfloor.dart check example/sample_app --lang ko --assume flutter.compileSdkVersion=35
@@ -179,14 +179,13 @@ jobs:
       - run: |
           git clone --depth 1 https://github.com/LeeGyeongPil/pluginfloor "$RUNNER_TEMP/pluginfloor"
           cd "$RUNNER_TEMP/pluginfloor" && dart pub get
-          # 두 --assume 값은 CI 에서 쓰는 Flutter 버전의 기본값으로 바꾸세요
-          # ("Flutter 기본 템플릿 앱" 참고). 앱 Gradle 파일에 숫자를 직접 적었다면
-          # 필요 없고, 그때 --strict 는 값이 나중에 알 수 없음으로 바뀌는 것도 막아 줍니다.
-          dart run bin/pluginfloor.dart check "$GITHUB_WORKSPACE" --strict \
-            --assume flutter.minSdkVersion=21 --assume flutter.compileSdkVersion=35
+          # flutter.* 기본값은 `flutter pub get` 이 쓴 Flutter SDK 에서 읽습니다.
+          # 덮어쓸 때만 --assume flutter.minSdkVersion=N
+          # (또는 flutter.compileSdkVersion=N) 을 추가하세요.
+          dart run bin/pluginfloor.dart check "$GITHUB_WORKSPACE" --strict
 ```
 
-`--assume` 없이 Android 플러그인이 하나라도 있는 기본 템플릿 앱에 `--strict` 를 쓰면 PF010 경고 때문에 매번 실패합니다.
+SDK 파일을 읽을 수 있는 한 `--assume` 은 필요 없습니다. 읽지 못하면 `--strict` 는 PF010 경고 때문에 실패합니다.
 
 ## 설정
 
@@ -205,15 +204,16 @@ flowchart LR
   A[".dart_tool/package_config.json"] --> B["Flutter 플러그인<br/>federated 패키지 포함"]
   B --> C["플러그인 파일<br/>build.gradle(.kts), AndroidManifest.xml,<br/>*.podspec, Package.swift"]
   D["앱 파일<br/>build.gradle(.kts), local.properties,<br/>Podfile, project.pbxproj"] --> E["비교"]
+  S["Flutter SDK 기본값<br/>FlutterExtension.kt"] --> E
   C --> E
   E --> F["표 / JSON / SARIF<br/>종료 코드 0 / 1 / 2"]
 ```
 
 1. `package_config.json` 에서 pubspec 에 `flutter: plugin:` 이 있는 패키지를 고릅니다(federated 구현 패키지 포함). 앱 자신과 플러그인의 `example/` 폴더는 제외합니다.
 2. 각 플러그인의 Gradle 파일·매니페스트에서 minSdk/compileSdk 를, podspec·`Package.swift` 에서 배포 대상을 줄 번호와 함께 읽습니다(AGP 블록 문법 `compileSdk { version = release(36) }` 포함).
-3. 앱의 파일에서 같은 값을 읽습니다.
+3. 앱의 파일에서 같은 값을 읽습니다. `flutter.minSdkVersion`·`flutter.compileSdkVersion` 은 `--assume` 이나 `local.properties` 에 값이 없으면 Flutter SDK(`package_config.json` 의 `flutter` 항목으로 찾음)의 기본값을 읽습니다.
 4. 대상마다 플러그인별 가장 높은 값을 남기고, 앱 값보다 높은 것을 보고합니다.
-5. 정적으로 정할 수 없는 값(`flutter.*`, `rootProject.*`, Ruby 식)은 추측하지 않고 알 수 없음으로 보고합니다. 리터럴 `ext` 값을 가진 `apply from:` 한 단계는 풀어 줍니다.
+5. 정적으로 정할 수 없는 값(SDK 파일을 읽지 못한 `flutter.*`, `rootProject.*`, Ruby 식)은 추측하지 않고 알 수 없음으로 보고합니다. 리터럴 `ext` 값을 가진 `apply from:` 한 단계는 풀어 줍니다.
 
 알려진 한계: Gradle 버전 카탈로그, `rootProject.ext`, 조건식, `-P` 덮어쓰기는 알 수 없음으로 남습니다. 앱 Gradle 파일에서는 첫 `minSdk`/`compileSdk` 선언만 쓰고(productFlavors 미지원), `Runner.xcodeproj` 만 읽으며, tvOS·watchOS·visionOS·Windows·Linux·Web 은 범위 밖입니다.
 
@@ -230,7 +230,7 @@ flowchart LR
 | 증상 | 원인 | 해결 |
 |---|---|---|
 | 종료 코드 2, `flutter pub get` 안내 | `.dart_tool/package_config.json` 없음 | 앱에서 `flutter pub get` 실행 또는 `--package-config` 지정 |
-| compileSdk·minSdk 에 PF010 경고 | 값이 빌드 시점(`flutter.*`)에 정해짐 | `--assume 이름=값` 을 주거나 `android/local.properties` 에 적기 |
+| compileSdk·minSdk 에 PF010 경고 | 값이 빌드 시점(`flutter.*`)에 정해짐 | SDK 파일을 읽지 못한 것이니 `--assume 이름=값` 을 주거나 `android/local.properties` 에 적기 |
 | iOS 에 PF012 경고 | `Podfile`·`project.pbxproj` 에서 배포 대상을 못 찾음 | Podfile 에 `platform :ios, '13.0'` 처럼 적기 |
 | 영어를 기대했는데 한국어가 나옴 | 로캘이 한국어 | `--lang en` 또는 `PLUGINFLOOR_LANG=en` |
 | Xcode 와 macOS 하한이 다름 | CocoaPods 와 SwiftPM 값이 다름(PF011) | `--darwin-path` 로 경로 선택 |

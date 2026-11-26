@@ -25,7 +25,7 @@ dart run bin/pluginfloor.dart --version
 ```
 
 ```text
-pluginfloor 0.1.2
+pluginfloor 0.2.0
 ```
 
 Your app must have had `flutter pub get` run once, because pluginfloor reads `.dart_tool/package_config.json` from it.
@@ -41,7 +41,7 @@ dart run bin/pluginfloor.dart check example/sample_app --lang en
 Use `--lang en` to force English; without it the language follows your locale.
 
 ```text
-pluginfloor 0.1.2 - 7 plugins scanned in example/sample_app
+pluginfloor 0.2.0 - 7 plugins scanned in example/sample_app
 
 Highest floor per target
   Target                   App      Required  Raised by
@@ -82,7 +82,7 @@ How to read it:
 An app that satisfies every floor prints `No violations.` and exits `0`:
 
 ```text
-pluginfloor 0.1.2 - 1 plugin scanned in test/fixtures/ok_app
+pluginfloor 0.2.0 - 1 plugin scanned in test/fixtures/ok_app
 
 Highest floor per target
   Target                   App   Required  Raised by
@@ -102,13 +102,13 @@ Findings
 
 ### Important: apps on the default Flutter template
 
-A new `flutter create` app writes `minSdk = flutter.minSdkVersion` and `compileSdk = flutter.compileSdkVersion` in `android/app/build.gradle.kts`. Those values are set by the Flutter Gradle plugin at build time, so pluginfloor cannot read them. **Without help, the Android comparison is skipped** (PF010 warnings, and no PF001/PF002 even if a plugin needs more). Tell it the values of the Flutter version you build with, or write literal numbers in the app Gradle file:
+A new `flutter create` app writes `minSdk = flutter.minSdkVersion` and `compileSdk = flutter.compileSdkVersion` in `android/app/build.gradle.kts`. Those values are set by the Flutter Gradle plugin at build time. pluginfloor therefore reads the defaults from your Flutter SDK automatically (the `flutter` entry of `.dart_tool/package_config.json` points to the SDK; two literals in `FlutterExtension.kt` are read, nothing is built or run). Use `--assume` only to override them (precedence: `--assume` > `android/local.properties` > SDK value). If the SDK file cannot be found or read, the names stay PF010 warnings and the Android comparison is skipped, as before:
 
 ```bash
 dart run bin/pluginfloor.dart check . --assume flutter.minSdkVersion=21 --assume flutter.compileSdkVersion=35
 ```
 
-Where to get the numbers: they are the defaults in `FlutterExtension.kt` of your Flutter SDK (`packages/flutter_tools/gradle/src/main/kotlin/`). In the Flutter 3.32.4 SDK (checked 2026-11-16) they are `minSdkVersion = 21` and `compileSdkVersion = 35`; they change between Flutter versions, so check yours. Reading them from the SDK automatically is not implemented yet.
+Where the numbers come from: the defaults in `FlutterExtension.kt` of your Flutter SDK (`packages/flutter_tools/gradle/src/main/kotlin/`). In the Flutter 3.32.4 SDK (checked 2026-11-16) they are `minSdkVersion = 21` and `compileSdkVersion = 35`; they change between Flutter versions. Note: apps that only showed PF010 before can now get PF001/PF002 errors, because pluginfloor now reads the SDK defaults itself, so a CI job that passed before can start failing.
 
 ## Usage
 
@@ -118,7 +118,7 @@ dart run bin/pluginfloor.dart check [app_dir] [options]
 
 | Option | What it does | Example |
 |---|---|---|
-| `--assume KEY=VALUE` | Gives a value to a name that cannot be resolved statically (repeatable) | `--assume flutter.compileSdkVersion=35` |
+| `--assume KEY=VALUE` | Overrides or supplies a value for a name (repeatable); needed for `flutter.*` only when the SDK file cannot be read | `--assume flutter.compileSdkVersion=35` |
 | `--darwin-path cocoapods\|spm\|both` | Which Apple build path decides the floor (default `both`, the higher) | `--darwin-path cocoapods` |
 | `--format table\|json\|sarif` | Report format | `--format sarif` |
 | `--output FILE` | Write the report to a file, keep a one-line summary on stdout | `--output floors.sarif` |
@@ -134,7 +134,7 @@ Rules: PF001 Android minSdk, PF002 Android compileSdk, PF003 iOS and PF004 macOS
 
 ### Resolve an unknown value
 
-`flutter.compileSdkVersion` is only decided by the Flutter Gradle plugin at build time, so the tool reports PF010 instead of guessing. Give it the value you build with:
+`flutter.compileSdkVersion` is only decided by the Flutter Gradle plugin at build time, so the tool reads it from your Flutter SDK and, when it cannot (as in the bundled sample app, whose `package_config.json` has no `flutter` entry), reports PF010 instead of guessing. Give it the value you build with:
 
 ```bash
 dart run bin/pluginfloor.dart check example/sample_app --lang en --assume flutter.compileSdkVersion=35
@@ -179,15 +179,13 @@ jobs:
       - run: |
           git clone --depth 1 https://github.com/LeeGyeongPil/pluginfloor "$RUNNER_TEMP/pluginfloor"
           cd "$RUNNER_TEMP/pluginfloor" && dart pub get
-          # Replace the two --assume values with the defaults of the Flutter
-          # version used in CI (see "apps on the default Flutter template").
-          # Not needed if the app Gradle file has literal numbers; then
-          # --strict also guards against values becoming unknown later.
-          dart run bin/pluginfloor.dart check "$GITHUB_WORKSPACE" --strict \
-            --assume flutter.minSdkVersion=21 --assume flutter.compileSdkVersion=35
+          # The flutter.* defaults are read from the Flutter SDK that
+          # `flutter pub get` used. Add --assume flutter.minSdkVersion=N
+          # (and/or flutter.compileSdkVersion=N) only to override them.
+          dart run bin/pluginfloor.dart check "$GITHUB_WORKSPACE" --strict
 ```
 
-Without the `--assume` flags, an app with the default Android template and at least one Android plugin would fail `--strict` on every run because of the PF010 warnings.
+No `--assume` flags are needed as long as the SDK file can be read; if it cannot, `--strict` fails on the PF010 warnings.
 
 ## Configuration
 
@@ -206,15 +204,16 @@ flowchart LR
   A[".dart_tool/package_config.json"] --> B["Flutter plugins<br/>incl. federated packages"]
   B --> C["Plugin files<br/>build.gradle(.kts), AndroidManifest.xml,<br/>*.podspec, Package.swift"]
   D["App files<br/>build.gradle(.kts), local.properties,<br/>Podfile, project.pbxproj"] --> E["Compare"]
+  S["Flutter SDK defaults<br/>FlutterExtension.kt"] --> E
   C --> E
   E --> F["Table / JSON / SARIF<br/>exit 0 / 1 / 2"]
 ```
 
 1. It lists packages in `package_config.json` that declare `flutter: plugin:` in their pubspec, federated implementation packages included. The app itself and plugin `example/` folders are ignored.
 2. It reads minSdk/compileSdk from each plugin's Gradle files and manifest, and deployment targets from podspecs and `Package.swift`, with line numbers (including the AGP block form `compileSdk { version = release(36) }`).
-3. It reads the same values from your app's files.
+3. It reads the same values from your app's files. For `flutter.minSdkVersion` / `flutter.compileSdkVersion` it reads the defaults from the Flutter SDK (found via the `flutter` entry of `package_config.json`) unless `--assume` or `local.properties` gives a value.
 4. Per target, it keeps each plugin's highest value and reports the ones above the app value.
-5. Values it cannot determine statically (`flutter.*`, `rootProject.*`, Ruby expressions) are reported as unknown, never guessed. One `apply from:` hop with a literal `ext` value is resolved.
+5. Values it cannot determine statically (`flutter.*` when the SDK file cannot be read, `rootProject.*`, Ruby expressions) are reported as unknown, never guessed. One `apply from:` hop with a literal `ext` value is resolved.
 
 Known limits: Gradle version catalogs, `rootProject.ext`, conditional expressions and `-P` overrides stay unknown; only the first `minSdk`/`compileSdk` declaration in the app Gradle file is used (no productFlavors); only `Runner.xcodeproj` is read; tvOS, watchOS, visionOS, Windows, Linux and Web are out of scope.
 
@@ -231,7 +230,7 @@ Known limits: Gradle version catalogs, `rootProject.ext`, conditional expression
 | Symptom | Cause | Fix |
 |---|---|---|
 | Exit code 2, hint about `flutter pub get` | No `.dart_tool/package_config.json` | Run `flutter pub get` in the app, or pass `--package-config` |
-| PF010 warning for compileSdk or minSdk | The value is set at build time (`flutter.*`) | Pass `--assume NAME=VALUE`, or write it in `android/local.properties` |
+| PF010 warning for compileSdk or minSdk | The value is set at build time (`flutter.*`) | The SDK file could not be read; pass `--assume NAME=VALUE`, or write it in `android/local.properties` |
 | PF012 warning for iOS | No deployment target found in `Podfile` or `project.pbxproj` | Set it in the Podfile (`platform :ios, '13.0'`) |
 | Korean text when you expected English | Locale is Korean | Add `--lang en` or set `PLUGINFLOOR_LANG=en` |
 | macOS floor differs from what Xcode shows | CocoaPods and SwiftPM disagree (PF011) | Choose a path with `--darwin-path` |
