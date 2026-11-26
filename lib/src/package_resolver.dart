@@ -90,3 +90,61 @@ List<PluginPackage> resolvePlugins(String appDir, {String? packageConfig}) {
   plugins.sort((a, b) => a.name.compareTo(b.name));
   return plugins;
 }
+
+final RegExp _sdkMinSdk = RegExp(
+  r'\bval\s+minSdkVersion\s*:\s*Int\s*=\s*(\d+)\b',
+);
+final RegExp _sdkCompileSdk = RegExp(
+  r'\bval\s+compileSdkVersion\s*:\s*Int\s*=\s*(\d+)\b',
+);
+
+/// Reads the `flutter.minSdkVersion` and `flutter.compileSdkVersion` defaults
+/// from the Flutter SDK that the app's `package_config.json` points to.
+///
+/// The SDK root is `<rootUri of package "flutter">/../..`. Only two integer
+/// literals of `FlutterExtension.kt` are read (no build, no process, no
+/// network). Anything missing or in an unexpected format is left out of the
+/// result, so those names stay unresolved. Never throws.
+Map<String, String> readFlutterSdkDefaults(
+  String appDir, {
+  String? packageConfig,
+}) {
+  try {
+    final configFile = File(
+      packageConfig ?? '$appDir/.dart_tool/package_config.json',
+    );
+    if (!configFile.existsSync()) return const {};
+    final json = jsonDecode(
+      utf8.decode(configFile.readAsBytesSync(), allowMalformed: true),
+    );
+    if (json is! Map || json['packages'] is! List) return const {};
+    final configUri = configFile.absolute.uri;
+    for (final entry in json['packages'] as List) {
+      if (entry is! Map ||
+          entry['name'] != 'flutter' ||
+          entry['rootUri'] is! String) {
+        continue;
+      }
+      final uri = configUri.resolve(entry['rootUri'] as String);
+      if (uri.scheme != 'file') return const {};
+      final flutterDir = Directory.fromUri(uri);
+      if (!flutterDir.existsSync()) return const {};
+      final sdkRoot = _canonical(Directory('${_canonical(flutterDir)}/../..'));
+      final kt = File(
+        '$sdkRoot/packages/flutter_tools/gradle/src/main/kotlin/'
+        'FlutterExtension.kt',
+      );
+      if (!kt.existsSync()) return const {};
+      final text = utf8.decode(kt.readAsBytesSync(), allowMalformed: true);
+      final out = <String, String>{};
+      final min = _sdkMinSdk.firstMatch(text);
+      if (min != null) out['flutter.minSdkVersion'] = min.group(1)!;
+      final compile = _sdkCompileSdk.firstMatch(text);
+      if (compile != null) out['flutter.compileSdkVersion'] = compile.group(1)!;
+      return out;
+    }
+  } on Object {
+    return const {};
+  }
+  return const {};
+}

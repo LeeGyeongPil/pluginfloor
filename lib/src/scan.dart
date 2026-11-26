@@ -129,5 +129,9 @@ ScanReport scanApp(AppScanOptions options) {
     app: readAppConfig(options.appDir),
     assume: options.assume,
     darwinPath: options.darwinPath,
+    sdkDefaults: readFlutterSdkDefaults(
+      options.appDir,
+      packageConfig: options.packageConfig,
+    ),
   );
 }

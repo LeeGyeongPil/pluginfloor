@@ -69,16 +69,18 @@ String _unresolvedFix(String expr) =>
 
 /// Compares plugin floors with the app and applies the PF rules.
 ///
-/// [assume] values replace unresolved names on both sides; the app's
-/// `local.properties` values replace unresolved names on the app side only.
+/// Precedence: [assume] > the app's `local.properties` (app side only) >
+/// [sdkDefaults] (Flutter SDK defaults for `flutter.*`, both sides).
 ScanReport compare({
   required List<String> pluginNames,
   required List<Finding> pluginFindings,
   required AppConfig app,
   required Map<String, String> assume,
   required DarwinPath darwinPath,
+  Map<String, String> sdkDefaults = const {},
 }) {
-  final plugin = [for (final f in pluginFindings) _substitute(f, assume)]
+  final pluginValues = {...sdkDefaults, ...assume};
+  final plugin = [for (final f in pluginFindings) _substitute(f, pluginValues)]
     ..sort((a, b) {
       var c = (a.package ?? '').compareTo(b.package ?? '');
       if (c != 0) return c;
@@ -87,7 +89,7 @@ ScanReport compare({
       c = a.file.compareTo(b.file);
       return c != 0 ? c : a.line.compareTo(b.line);
     });
-  final appValues = {...app.localProperties, ...assume};
+  final appValues = {...sdkDefaults, ...app.localProperties, ...assume};
   final appFindings = [for (final f in app.findings) _substitute(f, appValues)];
 
   final violations = <Violation>[];
