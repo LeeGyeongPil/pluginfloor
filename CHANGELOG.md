@@ -3,6 +3,16 @@
 All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [0.2.0] - 2026-11-26
+
+### Added
+
+- `flutter.minSdkVersion` and `flutter.compileSdkVersion` are now read from the Flutter SDK automatically: the SDK root comes from the `flutter` package `rootUri` in `package_config.json`, and the two integer literals in `packages/flutter_tools/gradle/src/main/kotlin/FlutterExtension.kt` are read statically (no build, no process, no network). Precedence is `--assume` > `android/local.properties` > SDK value. If the package, the file or the literal format is missing, the name stays PF010 as before.
+
+### Changed
+
+- Behavior change: apps on the default Flutter template that previously only got PF010 warnings can now get PF001/PF002 errors when a plugin needs a higher minSdk/compileSdk than the SDK default, so a CI job that passed before can start failing. Pass `--assume` or raise the values in the app Gradle file.
+
 ## [0.1.2] - 2026-11-17
 
 ### Changed
@@ -32,5 +42,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and 
 - Bundled fake sample app in `example/sample_app`.
 - Korean table columns are padded by display width; Korean help text includes defaults; singular title for one plugin; Apple `Package.swift` violations also point at the Runner `project.pbxproj`.
 
+[0.2.0]: https://github.com/LeeGyeongPil/pluginfloor/releases/tag/v0.2.0
+[0.1.2]: https://github.com/LeeGyeongPil/pluginfloor/releases/tag/v0.1.2
 [0.1.1]: https://github.com/LeeGyeongPil/pluginfloor/releases/tag/v0.1.1
 [0.1.0]: https://github.com/LeeGyeongPil/pluginfloor/releases/tag/v0.1.0
